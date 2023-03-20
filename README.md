@@ -28,6 +28,8 @@ go get github.com/spf13/viper@v1.13.0
 go get k8s.io/client-go@v0.20.4
 ```
 
+> 参考文档：https://github.com/kubernetes/client-go
+
 ## 项目接口开发
 
 ### Pod管理接口开发
