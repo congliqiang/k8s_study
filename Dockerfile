@@ -11,7 +11,7 @@ RUN go env -w GO111MODULE=on \
 
 FROM alpine:latest
 
-LABEL MAINTAINER="muxian-z@imooc.com"
+LABEL MAINTAINER="muxian@imooc.com"
 
 WORKDIR /go/src/kubeimooc.com/server
 COPY --from=0 /go/src/kubeimooc.com/server/config.yaml ./config.yaml
