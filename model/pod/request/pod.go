@@ -1,17 +1,17 @@
 package request
 
-//@Author: morris
+import (
+	corev1 "k8s.io/api/core/v1"
+	"kubeimooc.com/model/base"
+)
 
-type ListMapItem struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
-}
+//@Author: morris
 
 type Base struct {
 	//名字
 	Name string `json:"name"`
 	//标签
-	Labels []ListMapItem `json:"labels"`
+	Labels []base.ListMapItem `json:"labels"`
 	//命名空间
 	Namespace string `json:"namespace"`
 	//重启策略 Always | Never | On-Failure
@@ -40,11 +40,11 @@ type DnsConfig struct {
 	Nameservers []string `json:"nameservers"`
 }
 type NetWorking struct {
-	HostNetwork bool          `json:"hostNetwork"`
-	HostName    string        `json:"hostName"`
-	DnsPolicy   string        `json:"dnsPolicy"`
-	DnsConfig   DnsConfig     `json:"dnsConfig"`
-	HostAliases []ListMapItem `json:"hostAliases"`
+	HostNetwork bool               `json:"hostNetwork"`
+	HostName    string             `json:"hostName"`
+	DnsPolicy   string             `json:"dnsPolicy"`
+	DnsConfig   DnsConfig          `json:"dnsConfig"`
+	HostAliases []base.ListMapItem `json:"hostAliases"`
 }
 type Resources struct {
 	//是否配置容器的配额
@@ -76,7 +76,7 @@ type ProbeHttpGet struct {
 	//请求端口
 	Port int32 `json:"port"`
 	//请求的header
-	HttpHeaders []ListMapItem `json:"httpHeaders"`
+	HttpHeaders []base.ListMapItem `json:"httpHeaders"`
 }
 type ProbeCommand struct {
 	// cat /test/test.txt
@@ -137,7 +137,7 @@ type Container struct {
 	//参数
 	Args []string `json:"args"`
 	//环境变量
-	Envs []ListMapItem `json:"envs"`
+	Envs []base.ListMapItem `json:"envs"`
 	//是否开启模式
 	Privileged bool `json:"privileged"`
 	//容器申请配额
@@ -152,9 +152,26 @@ type Container struct {
 	ReadinessProbe ContainerProbe `json:"readinessProbe"`
 }
 
+type NodeSelectorTermExpressions struct {
+	Key      string                      `json:"key"`
+	Operator corev1.NodeSelectorOperator `json:"operator"`
+	Value    string                      `json:"value"`
+}
+
+type NodeScheduling struct {
+	//nodeName nodeSelector nodeAffinity
+	Type         string                        `json:"type"`
+	NodeName     string                        `json:"nodeName"`
+	NodeSelector []base.ListMapItem            `json:"nodeSelector"`
+	NodeAffinity []NodeSelectorTermExpressions `json:"nodeAffinity"`
+}
+
 type Pod struct {
 	//基础定义信息
 	Base Base `json:"base"`
+	//pod 容忍
+	Tolerations    []corev1.Toleration `json:"tolerations"`
+	NodeScheduling NodeScheduling      `json:"nodeScheduling"`
 	// 卷
 	Volumes []Volume `json:"volumes"`
 	//网络相关

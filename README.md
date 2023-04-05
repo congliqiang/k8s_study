@@ -20,15 +20,13 @@ go get -u github.com/gin-gonic/gin@v1.8.1
 go get github.com/spf13/viper@v1.13.0
 ```
 
-> 参考文档：https://github.com/kubernetes/client-go
+> 参考文档：https://github.com/spf13/viper
 
 ### k8s集成
 
 ```bash
 go get k8s.io/client-go@v0.20.4
 ```
-
-> 参考文档：https://github.com/kubernetes/client-go
 
 ## 项目接口开发
 
@@ -48,3 +46,13 @@ go get k8s.io/client-go@v0.20.4
 2. 更新 pod 超时 -- pod删除等待时间不确定 改为强制删除
 3. pod列表支持关键字搜索
 
+### NodeScheduling接口开发
+- [x] node列表/详情(kubectl get nodes / kubectl describe node node-x)
+- [x] node标签管理(kubectl label node node-x label-x=label-value-x)
+   - 所有的标签上传
+- [x] node污点(taint)管理
+- [x] 查看node上所有的pod(kubectl get pod -n ns-x -o wide)
+
+pod管理接口改动：
+- [x] pod新增容忍(tolerations)参数 
+- [x] pod选择哪种方式调度：nodeName/nodeSelector/nodeAffinity

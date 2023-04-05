@@ -3,6 +3,7 @@ package pod
 import (
 	"fmt"
 	corev1 "k8s.io/api/core/v1"
+	"kubeimooc.com/model/base"
 	pod_req "kubeimooc.com/model/pod/request"
 	pod_res "kubeimooc.com/model/pod/response"
 	"strings"
@@ -43,9 +44,49 @@ func (*K8s2ReqConvert) PodK8s2ItemRes(pod corev1.Pod) pod_res.PodListItem {
 	}
 }
 
+func getNodeReqScheduling(podK8s corev1.Pod) pod_req.NodeScheduling {
+	nodeScheduling := pod_req.NodeScheduling{
+		Type: scheduling_nodeany,
+	}
+	if podK8s.Spec.NodeSelector != nil {
+		nodeScheduling.Type = scheduling_nodeselector
+		labels := make([]base.ListMapItem, 0)
+		for k, v := range podK8s.Spec.NodeSelector {
+			labels = append(labels, base.ListMapItem{
+				Key:   k,
+				Value: v,
+			})
+		}
+		nodeScheduling.NodeSelector = labels
+		return nodeScheduling
+	}
+	if podK8s.Spec.Affinity != nil {
+		nodeScheduling.Type = scheduling_nodeaffinity
+		term := podK8s.Spec.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms[0]
+		matchExpressions := make([]pod_req.NodeSelectorTermExpressions, 0)
+		for _, expression := range term.MatchExpressions {
+			matchExpressions = append(matchExpressions, pod_req.NodeSelectorTermExpressions{
+				Key:      expression.Key,
+				Value:    strings.Join(expression.Values, ","),
+				Operator: expression.Operator,
+			})
+		}
+		nodeScheduling.NodeAffinity = matchExpressions
+		return nodeScheduling
+	}
+	if podK8s.Spec.NodeName != "" {
+		nodeScheduling.Type = scheduling_nodename
+		nodeScheduling.NodeName = podK8s.Spec.NodeName
+		return nodeScheduling
+	}
+	return nodeScheduling
+}
+
 func (this *K8s2ReqConvert) PodK8s2Req(podK8s corev1.Pod) pod_req.Pod {
 	return pod_req.Pod{
 		Base:           getReqBase(podK8s),
+		Tolerations:    podK8s.Spec.Tolerations,
+		NodeScheduling: getNodeReqScheduling(podK8s),
 		NetWorking:     getReqNetworking(podK8s),
 		Volumes:        this.getReqVolumes(podK8s.Spec.Volumes),
 		Containers:     this.getReqContainers(podK8s.Spec.Containers),
@@ -95,9 +136,9 @@ func getReqContainerProbe(probeK8s *corev1.Probe) pod_req.ContainerProbe {
 		} else if probeK8s.HTTPGet != nil {
 			containerProbe.Type = probe_http
 			httpGet := probeK8s.HTTPGet
-			headersReq := make([]pod_req.ListMapItem, 0)
+			headersReq := make([]base.ListMapItem, 0)
 			for _, headerK8s := range httpGet.HTTPHeaders {
-				headersReq = append(headersReq, pod_req.ListMapItem{
+				headersReq = append(headersReq, base.ListMapItem{
 					Key:   headerK8s.Name,
 					Value: headerK8s.Value,
 				})
@@ -171,10 +212,10 @@ func getReqContainerPrivileged(ctx *corev1.SecurityContext) (privileged bool) {
 	return
 }
 
-func getReqContainersEnvs(envsK8s []corev1.EnvVar) []pod_req.ListMapItem {
-	envsReq := make([]pod_req.ListMapItem, 0)
+func getReqContainersEnvs(envsK8s []corev1.EnvVar) []base.ListMapItem {
+	envsReq := make([]base.ListMapItem, 0)
 	for _, item := range envsK8s {
-		envsReq = append(envsReq, pod_req.ListMapItem{
+		envsReq = append(envsReq, base.ListMapItem{
 			Key:   item.Name,
 			Value: item.Value,
 		})
@@ -212,10 +253,10 @@ func (this *K8s2ReqConvert) getReqVolumes(volumes []corev1.Volume) []pod_req.Vol
 	return volumesReq
 }
 
-func getReqHostAliases(hostAlias []corev1.HostAlias) []pod_req.ListMapItem {
-	hostAliasReq := make([]pod_req.ListMapItem, 0)
+func getReqHostAliases(hostAlias []corev1.HostAlias) []base.ListMapItem {
+	hostAliasReq := make([]base.ListMapItem, 0)
 	for _, alias := range hostAlias {
-		hostAliasReq = append(hostAliasReq, pod_req.ListMapItem{
+		hostAliasReq = append(hostAliasReq, base.ListMapItem{
 			Key:   alias.IP,
 			Value: strings.Join(alias.Hostnames, ","),
 		})
@@ -244,10 +285,10 @@ func getReqNetworking(pod corev1.Pod) pod_req.NetWorking {
 		HostAliases: getReqHostAliases(pod.Spec.HostAliases),
 	}
 }
-func getReqLabels(data map[string]string) []pod_req.ListMapItem {
-	labels := make([]pod_req.ListMapItem, 0)
+func getReqLabels(data map[string]string) []base.ListMapItem {
+	labels := make([]base.ListMapItem, 0)
 	for k, v := range data {
-		labels = append(labels, pod_req.ListMapItem{
+		labels = append(labels, base.ListMapItem{
 			Key:   k,
 			Value: v,
 		})

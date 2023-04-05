@@ -10,6 +10,24 @@
     ],
     "restartPolicy": "Always"
   },
+  "tolerations": [
+    {
+      "key": "test",
+      "value": "app",
+      "effect": "NoSchedule",
+      "operator": "Equal"
+    }
+  ],
+  "nodeScheduling": {
+    "type": "nodeAffinity",
+    "nodeAffinity": [
+      {
+        "key": "test",
+        "value": "app",
+        "operator": "In"
+      }
+    ]
+  },
   "volumes": [
     {
       "name": "cache-volume",

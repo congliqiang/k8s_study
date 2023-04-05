@@ -5,6 +5,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"kubeimooc.com/model/base"
 	pod_req "kubeimooc.com/model/pod/request"
 	"strconv"
 	"strings"
@@ -20,12 +21,62 @@ const (
 	volume_emptyDir = "emptyDir"
 )
 
+const (
+	scheduling_nodename     = "nodeName"
+	scheduling_nodeselector = "nodeSelector"
+	scheduling_nodeaffinity = "nodeAffinity"
+	scheduling_nodeany      = "nodeAny"
+)
+
 //@Author: morris
 type Req2K8sConvert struct {
 }
 
+func getNodeK8sScheduling(podReq pod_req.Pod) (affinity *corev1.Affinity, nodeSelector map[string]string, nodeName string) {
+	nodeScheduling := podReq.NodeScheduling
+	switch nodeScheduling.Type {
+	case scheduling_nodename:
+		nodeName = nodeScheduling.NodeName
+		return
+	case scheduling_nodeselector:
+		nodeSelectorMap := make(map[string]string)
+		for _, item := range nodeScheduling.NodeSelector {
+			nodeSelectorMap[item.Key] = item.Value
+		}
+		nodeSelector = nodeSelectorMap
+		return
+	case scheduling_nodeaffinity:
+		nodeSelectorTermExpressions := nodeScheduling.NodeAffinity
+		matchExpression := make([]corev1.NodeSelectorRequirement, 0)
+		for _, expression := range nodeSelectorTermExpressions {
+			matchExpression = append(matchExpression, corev1.NodeSelectorRequirement{
+				Key:      expression.Key,
+				Values:   strings.Split(expression.Value, ","),
+				Operator: expression.Operator,
+			})
+		}
+		affinity = &corev1.Affinity{
+			NodeAffinity: &corev1.NodeAffinity{
+				RequiredDuringSchedulingIgnoredDuringExecution: &corev1.NodeSelector{
+					NodeSelectorTerms: []corev1.NodeSelectorTerm{
+						{
+							MatchExpressions: matchExpression,
+						},
+					},
+				},
+			},
+		}
+	case scheduling_nodeany:
+		//do nothing
+	default:
+		//do nothing
+	}
+	return
+}
+
 //将pod 的 请求格式的数据 转换为 k8s 结构的数据
 func (pc *Req2K8sConvert) PodReq2K8s(podReq pod_req.Pod) *corev1.Pod {
+	nodeAffinity, nodeSelector, nodeName := getNodeK8sScheduling(podReq)
 	return &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      podReq.Base.Name,
@@ -33,6 +84,10 @@ func (pc *Req2K8sConvert) PodReq2K8s(podReq pod_req.Pod) *corev1.Pod {
 			Labels:    pc.getK8sLabels(podReq.Base.Labels),
 		},
 		Spec: corev1.PodSpec{
+			NodeName:       nodeName,
+			NodeSelector:   nodeSelector,
+			Affinity:       nodeAffinity,
+			Tolerations:    podReq.Tolerations,
 			InitContainers: pc.getK8sContainers(podReq.InitContainers),
 			Containers:     pc.getK8sContainers(podReq.Containers),
 			Volumes:        pc.getK8sVolumes(podReq.Volumes),
@@ -47,7 +102,7 @@ func (pc *Req2K8sConvert) PodReq2K8s(podReq pod_req.Pod) *corev1.Pod {
 	}
 }
 
-func (pc *Req2K8sConvert) getK8sHostAlias(podReqHostAliases []pod_req.ListMapItem) []corev1.HostAlias {
+func (pc *Req2K8sConvert) getK8sHostAlias(podReqHostAliases []base.ListMapItem) []corev1.HostAlias {
 	podK8sHostAliases := make([]corev1.HostAlias, 0)
 	for _, item := range podReqHostAliases {
 		podK8sHostAliases = append(podK8sHostAliases, corev1.HostAlias{
@@ -184,7 +239,7 @@ func (pc *Req2K8sConvert) getK8sVolumeMounts(podReqMounts []pod_req.VolumeMount)
 	}
 	return podK8sVolumeMounts
 }
-func (pc *Req2K8sConvert) getK8sEnv(podReqEnv []pod_req.ListMapItem) []corev1.EnvVar {
+func (pc *Req2K8sConvert) getK8sEnv(podReqEnv []base.ListMapItem) []corev1.EnvVar {
 	podK8sEnvs := make([]corev1.EnvVar, 0)
 	for _, item := range podReqEnv {
 		podK8sEnvs = append(podK8sEnvs, corev1.EnvVar{
@@ -194,7 +249,7 @@ func (pc *Req2K8sConvert) getK8sEnv(podReqEnv []pod_req.ListMapItem) []corev1.En
 	}
 	return podK8sEnvs
 }
-func (pc *Req2K8sConvert) getK8sLabels(podReqLabels []pod_req.ListMapItem) map[string]string {
+func (pc *Req2K8sConvert) getK8sLabels(podReqLabels []base.ListMapItem) map[string]string {
 	podK8sLabels := make(map[string]string)
 	for _, label := range podReqLabels {
 		podK8sLabels[label.Key] = label.Value

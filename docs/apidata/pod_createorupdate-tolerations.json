@@ -10,6 +10,14 @@
     ],
     "restartPolicy": "Always"
   },
+  "tolerations": [
+    {
+      "key": "test",
+      "value": "app",
+      "effect": "NoSchedule",
+      "operator": "Equal"
+    }
+  ],
   "volumes": [
     {
       "name": "cache-volume",
