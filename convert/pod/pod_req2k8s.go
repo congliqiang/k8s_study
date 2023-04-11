@@ -28,6 +28,11 @@ const (
 	scheduling_nodeany      = "nodeAny"
 )
 
+const (
+	ref_type_configMap = "configMap"
+	ref_type_secret    = "secret"
+)
+
 //@Author: morris
 type Req2K8sConvert struct {
 }
@@ -152,6 +157,7 @@ func (pc *Req2K8sConvert) getK8sContainer(podReqContainer pod_req.Container) cor
 		},
 		Ports:          pc.getK8sPorts(podReqContainer.Ports),
 		Env:            pc.getK8sEnv(podReqContainer.Envs),
+		EnvFrom:        pc.getK8sEnvFrom(podReqContainer.EnvsFrom),
 		VolumeMounts:   pc.getK8sVolumeMounts(podReqContainer.VolumeMounts),
 		StartupProbe:   pc.getK8sContainerProbe(podReqContainer.StartupProbe),
 		LivenessProbe:  pc.getK8sContainerProbe(podReqContainer.LivenessProbe),
@@ -239,13 +245,61 @@ func (pc *Req2K8sConvert) getK8sVolumeMounts(podReqMounts []pod_req.VolumeMount)
 	}
 	return podK8sVolumeMounts
 }
-func (pc *Req2K8sConvert) getK8sEnv(podReqEnv []base.ListMapItem) []corev1.EnvVar {
+func (pc *Req2K8sConvert) getK8sEnvFrom(podReqEnvsFrom []pod_req.EnvVarFromResource) []corev1.EnvFromSource {
+	podK8sEnvsFrom := make([]corev1.EnvFromSource, 0)
+	for _, fromResource := range podReqEnvsFrom {
+		//前缀通用
+		envFromResource := corev1.EnvFromSource{
+			Prefix: fromResource.Prefix,
+		}
+		switch fromResource.RefType {
+		case ref_type_configMap:
+			envFromResource.ConfigMapRef = &corev1.ConfigMapEnvSource{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: fromResource.Name,
+				},
+			}
+			podK8sEnvsFrom = append(podK8sEnvsFrom, envFromResource)
+		case ref_type_secret:
+			envFromResource.SecretRef = &corev1.SecretEnvSource{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: fromResource.Name,
+				},
+			}
+			podK8sEnvsFrom = append(podK8sEnvsFrom, envFromResource)
+		}
+	}
+	return podK8sEnvsFrom
+}
+func (pc *Req2K8sConvert) getK8sEnv(podReqEnv []pod_req.EnvVar) []corev1.EnvVar {
 	podK8sEnvs := make([]corev1.EnvVar, 0)
 	for _, item := range podReqEnv {
-		podK8sEnvs = append(podK8sEnvs, corev1.EnvVar{
-			Name:  item.Key,
-			Value: item.Value,
-		})
+		envVar := corev1.EnvVar{
+			Name: item.Name,
+		}
+		switch item.Type {
+		case ref_type_configMap:
+			envVar.ValueFrom = &corev1.EnvVarSource{
+				ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
+					Key: item.Value,
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: item.RefName,
+					},
+				},
+			}
+		case ref_type_secret:
+			envVar.ValueFrom = &corev1.EnvVarSource{
+				SecretKeyRef: &corev1.SecretKeySelector{
+					Key: item.Value,
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: item.RefName,
+					},
+				},
+			}
+		default:
+			envVar.Value = item.Value
+		}
+		podK8sEnvs = append(podK8sEnvs, envVar)
 	}
 	return podK8sEnvs
 }

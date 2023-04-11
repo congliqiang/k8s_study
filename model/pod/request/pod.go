@@ -120,6 +120,22 @@ type ContainerPort struct {
 	HostPort      int32  `json:"hostPort"`
 }
 
+type EnvVar struct {
+	Name    string `json:"name"`
+	RefName string `json:"refName"`
+	Value   string `json:"value"`
+	//configMap | secret | default(k/v形式)
+	Type string `json:"type"`
+}
+type EnvVarFromResource struct {
+	//资源名称
+	Name string `json:"name"`
+	//configMap | secret
+	RefType string `json:"refType"`
+	//用于表示环境变量前缀
+	Prefix string `json:"prefix"`
+}
+
 type Container struct {
 	//容器名称
 	Name string `json:"name"`
@@ -136,8 +152,9 @@ type Container struct {
 	Command []string `json:"command"`
 	//参数
 	Args []string `json:"args"`
-	//环境变量
-	Envs []base.ListMapItem `json:"envs"`
+	//环境变量 [{key:value}]
+	Envs     []EnvVar             `json:"envs"`
+	EnvsFrom []EnvVarFromResource `json:"envsFrom"`
 	//是否开启模式
 	Privileged bool `json:"privileged"`
 	//容器申请配额

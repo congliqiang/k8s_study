@@ -21,4 +21,15 @@ func (*K8sRouter) InitK8SRouter(r *gin.Engine) {
 	group.GET("/node", apiGroup.GetNodeDetailOrList)
 	group.PUT("/node/label", apiGroup.UpdateNodeLabel)
 	group.PUT("/node/taint", apiGroup.UpdateNodeTaint)
+
+	//******************ConfigMap************************//
+	group.POST("/configmap", apiGroup.CreateOrUpdateConfigMap)
+	group.GET("/configmap/:namespace", apiGroup.GetConfigMapDetailOrList)
+	group.DELETE("/configmap/:namespace/:name", apiGroup.DeleteConfigMap)
+
+	//*******************Secret***********************//
+	group.POST("/secret", apiGroup.CreateOrUpdateSecret)
+	group.GET("/secret/:namespace", apiGroup.GetSecretDetailOrList)
+	group.DELETE("/secret/:namespace/:name", apiGroup.DeleteSecret)
+
 }

@@ -4,10 +4,11 @@ kind: Pod
 metadata:
   name: busybox
   namespace: test
-  labels: 
+  labels:
     app: busybox
 
-spec: 
+spec:
   containers:
-  - name: busybox
-    image: busybox
+    - name: busybox
+      image: busybox
+

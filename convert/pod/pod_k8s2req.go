@@ -114,6 +114,7 @@ func (this *K8s2ReqConvert) getReqContainer(container corev1.Container) pod_req.
 		////
 		Ports:          getReqContainerPorts(container.Ports),
 		Envs:           getReqContainersEnvs(container.Env),
+		EnvsFrom:       getReqContainersEnvsFrom(container.EnvFrom),
 		Privileged:     getReqContainerPrivileged(container.SecurityContext),
 		Resources:      getReqContainerResources(container.Resources),
 		VolumeMounts:   this.getReqContainerVolumeMounts(container.VolumeMounts),
@@ -211,14 +212,46 @@ func getReqContainerPrivileged(ctx *corev1.SecurityContext) (privileged bool) {
 	}
 	return
 }
-
-func getReqContainersEnvs(envsK8s []corev1.EnvVar) []base.ListMapItem {
-	envsReq := make([]base.ListMapItem, 0)
+func getReqContainersEnvsFrom(envsFromK8s []corev1.EnvFromSource) []pod_req.EnvVarFromResource {
+	podReqEnvsFromList := make([]pod_req.EnvVarFromResource, 0)
+	for _, envK8sItem := range envsFromK8s {
+		podReqEnvsFrom := pod_req.EnvVarFromResource{
+			Prefix: envK8sItem.Prefix,
+		}
+		if envK8sItem.ConfigMapRef != nil {
+			podReqEnvsFrom.RefType = ref_type_configMap
+			podReqEnvsFrom.Name = envK8sItem.ConfigMapRef.Name
+		}
+		if envK8sItem.SecretRef != nil {
+			podReqEnvsFrom.RefType = ref_type_secret
+			podReqEnvsFrom.Name = envK8sItem.SecretRef.Name
+		}
+		podReqEnvsFromList = append(podReqEnvsFromList, podReqEnvsFrom)
+	}
+	return podReqEnvsFromList
+}
+func getReqContainersEnvs(envsK8s []corev1.EnvVar) []pod_req.EnvVar {
+	envsReq := make([]pod_req.EnvVar, 0)
 	for _, item := range envsK8s {
-		envsReq = append(envsReq, base.ListMapItem{
-			Key:   item.Name,
-			Value: item.Value,
-		})
+		envVar := pod_req.EnvVar{
+			Name: item.Name,
+		}
+		if item.ValueFrom != nil {
+			if item.ValueFrom.ConfigMapKeyRef != nil {
+				envVar.Type = ref_type_configMap
+				envVar.Value = item.ValueFrom.ConfigMapKeyRef.Key
+				envVar.RefName = item.ValueFrom.ConfigMapKeyRef.Name
+			}
+			if item.ValueFrom.SecretKeyRef != nil {
+				envVar.Type = ref_type_secret
+				envVar.Value = item.ValueFrom.SecretKeyRef.Key
+				envVar.RefName = item.ValueFrom.SecretKeyRef.Name
+			}
+		} else {
+			envVar.Type = "default"
+			envVar.Value = item.Value
+		}
+		envsReq = append(envsReq, envVar)
 	}
 	return envsReq
 }
