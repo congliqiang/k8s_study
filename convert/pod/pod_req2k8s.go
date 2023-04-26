@@ -18,7 +18,12 @@ const (
 )
 
 const (
-	volume_emptyDir = "emptyDir"
+	volume_emptyDir  = "emptyDir"
+	volume_configMap = "configMap"
+	volume_secret    = "secret"
+	volume_hostPath  = "hostPath"
+	volume_downward  = "downwardAPI"
+	volume_pvc       = "pvc"
 )
 
 const (
@@ -121,11 +126,65 @@ func (pc *Req2K8sConvert) getK8sHostAlias(podReqHostAliases []base.ListMapItem) 
 func (pc *Req2K8sConvert) getK8sVolumes(podReqVolumes []pod_req.Volume) []corev1.Volume {
 	podK8sVolumes := make([]corev1.Volume, 0)
 	for _, volume := range podReqVolumes {
-		if volume.Type != volume_emptyDir {
+		//if volume.Type != volume_emptyDir {
+		//	continue
+		//}
+		source := corev1.VolumeSource{}
+		switch volume.Type {
+		case volume_emptyDir:
+			source = corev1.VolumeSource{
+				EmptyDir: &corev1.EmptyDirVolumeSource{},
+			}
+		case volume_hostPath:
+			pathType := volume.HostPathVolume.Type
+			source = corev1.VolumeSource{
+				HostPath: &corev1.HostPathVolumeSource{
+					Type: &pathType,
+					Path: volume.HostPathVolume.Path,
+				},
+			}
+		case volume_configMap:
+			optional := volume.ConfigMapRefVolume.Optional
+			source = corev1.VolumeSource{
+				ConfigMap: &corev1.ConfigMapVolumeSource{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: volume.ConfigMapRefVolume.Name,
+					},
+					Optional: &optional,
+				},
+			}
+		case volume_secret:
+			optional := volume.SecretRefVolume.Optional
+			source = corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: volume.SecretRefVolume.Name,
+					Optional:   &optional,
+				},
+			}
+		case volume_downward:
+			items := make([]corev1.DownwardAPIVolumeFile, 0)
+			for _, item := range volume.DownwardAPIVolume.Items {
+				items = append(items, corev1.DownwardAPIVolumeFile{
+					//容器内的文件访问路径
+					Path: item.Path,
+					FieldRef: &corev1.ObjectFieldSelector{
+						FieldPath: item.FieldRefPath,
+					},
+				})
+			}
+			source = corev1.VolumeSource{
+				DownwardAPI: &corev1.DownwardAPIVolumeSource{
+					Items: items,
+				},
+			}
+		case volume_pvc:
+			source = corev1.VolumeSource{
+				PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
+					ClaimName: volume.PVCVolume.Name,
+				},
+			}
+		default:
 			continue
-		}
-		source := corev1.VolumeSource{
-			EmptyDir: &corev1.EmptyDirVolumeSource{},
 		}
 		podK8sVolumes = append(podK8sVolumes, corev1.Volume{
 			VolumeSource: source,

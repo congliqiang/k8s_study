@@ -30,8 +30,32 @@ go get k8s.io/client-go@v0.20.4
 
 ## 项目接口开发
 
+### k8s卷管理接口 v1.5
 
-### 应用与配置分离接口
+PersistentVolume
+- [x] 创建
+- [x] 删除
+- [X] 查询--列表
+
+PersistentVolumeClaim
+- [x] 创建
+- [x] 删除
+- [x] 查询--列表
+
+StorageClass
+- [x] 创建
+- [x] 删除
+- [x] 查询--列表
+
+[x] Pod管理（卷管理部分的逻辑）
+
+优化点：
+- [x] downward fileRefPath没有显示
+- [x] PVC选择PV或Sc只能二选一
+- [x] SC PVC PV 添加keyword搜素字段
+- [x] PV显示StorageClassName
+
+### 应用与配置分离接口 v1.4
 
 ConfigMap
 - [x] ConfigMap 新增/修改
@@ -47,7 +71,7 @@ pod管理接口改动：
 - [x] 新增ConfigMap和ConfigMepKey
 - [x] 新增Secret和SecretKey
 
-### NodeScheduling接口开发
+### NodeScheduling接口开发 1.3
 - [x] node列表/详情(kubectl get nodes / kubectl describe node node-x)
 - [x] node标签管理(kubectl label node node-x label-x=label-value-x)
     - 所有的标签上传
@@ -59,7 +83,7 @@ pod管理接口改动：
 - [x] pod选择哪种方式调度：nodeName/nodeSelector/nodeAffinity
 
 
-### Pod管理接口开发
+### Pod管理接口开发 1.2
 - [x] 命名空间列表接口
 - [x] Pod创建
 - [x] Pod编辑（更新/升级）

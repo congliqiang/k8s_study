@@ -18,9 +18,43 @@ type Base struct {
 	RestartPolicy string `json:"restartPolicy"`
 }
 
+type ConfigMapRefVolume struct {
+	Name     string `json:"name"`
+	Optional bool   `json:"optional"`
+}
+type SecretRefVolume struct {
+	Name     string `json:"name"`
+	Optional bool   `json:"optional"`
+}
+
+type HostPathVolume struct {
+	Type corev1.HostPathType `json:"type"`
+	//宿主机路径
+	Path string `json:"path"`
+}
+
+type DownwardAPIVolumeItem struct {
+	Path         string `json:"path"`
+	FieldRefPath string `json:"fieldRefPath"`
+}
+
+type DownwardAPIVolume struct {
+	Items []DownwardAPIVolumeItem `json:"items"`
+}
+type PVCVolume struct {
+	//pvc name
+	Name string `json:"name"`
+}
+
 type Volume struct {
 	Name string `json:"name"`
-	Type string `json:"type"`
+	//emptydir | configMap | secret | hostPath | downward | pvc
+	Type               string             `json:"type"`
+	ConfigMapRefVolume ConfigMapRefVolume `json:"configMapRefVolume"`
+	SecretRefVolume    SecretRefVolume    `json:"secretRefVolume"`
+	HostPathVolume     HostPathVolume     `json:"hostPathVolume"`
+	DownwardAPIVolume  DownwardAPIVolume  `json:"downwardAPIVolume"`
+	PVCVolume          PVCVolume          `json:"PVCVolume"`
 }
 
 //hostNetwork: true

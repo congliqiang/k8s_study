@@ -270,18 +270,94 @@ func getReqContainerPorts(portsK8s []corev1.ContainerPort) []pod_req.ContainerPo
 
 func (this *K8s2ReqConvert) getReqVolumes(volumes []corev1.Volume) []pod_req.Volume {
 	volumesReq := make([]pod_req.Volume, 0)
+	if this.volumeMap == nil {
+		this.volumeMap = make(map[string]string)
+	}
 	for _, volume := range volumes {
-		if volume.EmptyDir == nil {
+		//if volume.EmptyDir == nil {
+		//	continue
+		//}
+		var volumeReq *pod_req.Volume
+		if volume.EmptyDir != nil {
+			volumeReq = &pod_req.Volume{
+				Type: volume_emptyDir,
+				Name: volume.Name,
+			}
+		}
+
+		if volume.ConfigMap != nil {
+			var optional bool
+			if volume.ConfigMap.Optional != nil {
+				optional = *volume.ConfigMap.Optional
+			}
+			volumeReq = &pod_req.Volume{
+				Type: volume_configMap,
+				Name: volume.Name,
+				ConfigMapRefVolume: pod_req.ConfigMapRefVolume{
+					Name:     volume.ConfigMap.Name,
+					Optional: optional,
+				},
+			}
+		}
+
+		if volume.Secret != nil {
+			var optional bool
+			if volume.Secret.Optional != nil {
+				optional = *volume.Secret.Optional
+			}
+			volumeReq = &pod_req.Volume{
+				Type: volume_secret,
+				Name: volume.Name,
+				SecretRefVolume: pod_req.SecretRefVolume{
+					Name:     volume.Secret.SecretName,
+					Optional: optional,
+				},
+			}
+		}
+
+		if volume.HostPath != nil {
+			volumeReq = &pod_req.Volume{
+				Type: volume_hostPath,
+				Name: volume.Name,
+				HostPathVolume: pod_req.HostPathVolume{
+					Path: volume.HostPath.Path,
+					Type: *volume.HostPath.Type,
+				},
+			}
+		}
+
+		if volume.PersistentVolumeClaim != nil {
+			volumeReq = &pod_req.Volume{
+				Type: volume_pvc,
+				Name: volume.Name,
+				PVCVolume: pod_req.PVCVolume{
+					Name: volume.PersistentVolumeClaim.ClaimName,
+				},
+			}
+		}
+
+		if volume.DownwardAPI != nil {
+			items := make([]pod_req.DownwardAPIVolumeItem, 0)
+			for _, item := range volume.DownwardAPI.Items {
+				items = append(items, pod_req.DownwardAPIVolumeItem{
+					Path:         item.Path,
+					FieldRefPath: item.FieldRef.FieldPath,
+				})
+			}
+			volumeReq = &pod_req.Volume{
+				Type: volume_downward,
+				Name: volume.Name,
+				DownwardAPIVolume: pod_req.DownwardAPIVolume{
+					Items: items,
+				},
+			}
+		}
+
+		if volumeReq == nil {
 			continue
 		}
-		if this.volumeMap == nil {
-			this.volumeMap = make(map[string]string)
-		}
 		this.volumeMap[volume.Name] = ""
-		volumesReq = append(volumesReq, pod_req.Volume{
-			Type: volume_type_emptydir,
-			Name: volume.Name,
-		})
+		volumesReq = append(volumesReq, *volumeReq)
 	}
 	return volumesReq
 }
