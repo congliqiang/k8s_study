@@ -47,4 +47,8 @@ func (*K8sRouter) InitK8SRouter(r *gin.Engine) {
 	group.GET("/sc/:namespace", apiGroup.GetSCList)
 	group.DELETE("/sc/:namespace/:name", apiGroup.DeleteSC)
 
+	initSvcRouter(group)
+	initIngressRouter(group)
+	intIngRouteRouter(group)
+
 }

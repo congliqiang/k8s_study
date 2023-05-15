@@ -30,6 +30,26 @@ go get k8s.io/client-go@v0.20.4
 
 ## 项目接口开发
 
+### k8s服务发现 v1.6
+
+Service
+- [x] 创建/更新
+- [x] 删除
+- [x] 查询（列表和详情）
+
+Ingress
+- [x] 创建/更新
+- [x] 删除
+- [x] 查询（列表和详情）
+
+
+IngressRoute
+- [x] 创建/更新
+- [x] 删除
+- [x] 查询（列表和详情） 
+- [x] Middleware的查询接口
+
+
 ### k8s卷管理接口 v1.5
 
 PersistentVolume
@@ -47,7 +67,8 @@ StorageClass
 - [x] 删除
 - [x] 查询--列表
 
-[x] Pod管理（卷管理部分的逻辑）
+Pod管理
+- [x] Pod管理（卷管理部分的逻辑）
 
 优化点：
 - [x] downward fileRefPath没有显示
