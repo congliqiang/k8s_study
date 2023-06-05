@@ -50,5 +50,10 @@ func (*K8sRouter) InitK8SRouter(r *gin.Engine) {
 	initSvcRouter(group)
 	initIngressRouter(group)
 	intIngRouteRouter(group)
+	initStatefulSetRouter(group)
+	initDeloymentRouter(group)
+	initDaemonSetRouter(group)
+	initJobRouter(group)
+	initCronJobRouter(group)
 
 }

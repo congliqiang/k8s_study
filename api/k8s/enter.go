@@ -17,6 +17,11 @@ type ApiGroup struct {
 	SvcApi
 	IngressApi
 	IngRouteApi
+	StatefulSetApi
+	DeploymentApi
+	DaemonsetApi
+	JobApi
+	CronJobApi
 }
 
 var podValidate = validate.ValidateGroupApp.PodValidate
@@ -30,3 +35,8 @@ var scService = service.ServiceGroupApp.SCServiceGroup.SCService
 var svcService = service.ServiceGroupApp.SvcServiceGroup.SvcService
 var ingressService = service.ServiceGroupApp.IngressServiceGroup.IngressService
 var ingRouteService = service.ServiceGroupApp.IngRouteServiceGroup.IngRouteService
+var statefulSetService = service.ServiceGroupApp.StatefulSetServiceGroup.StatefulSetService
+var deploymentService = service.ServiceGroupApp.DeploymentServiceGroup.DeploymentService
+var daemonsetService = service.ServiceGroupApp.DaemonSetServiceGroup.DaemonSetService
+var jobService = service.ServiceGroupApp.JobServiceGroup.JobSetService
+var cronJobService = service.ServiceGroupApp.CronJobServiceGroup.CronJobSetService
