@@ -18,7 +18,7 @@ steps:
       repo: harbor.kubeimooc.com/kubeimooc/kubeimooc-server
       registry: harbor.kubeimooc.com
       tags:
-        - v1.7
+        - v1.8.1
   - name: ssh commands
     image: appleboy/drone-ssh:1.6.13
     settings:
@@ -30,8 +30,8 @@ steps:
       script:
         #拉取镜像并重启 注意--需要提前在目标主机完成docker login
         - if [ $(docker ps -a | grep kubeimooc-server | wc -l) -ge 1 ];then docker stop kubeimooc-server && docker rm kubeimooc-server; fi
-        - docker pull harbor.kubeimooc.com/kubeimooc/kubeimooc-server:v1.7
-        - docker run --name kubeimooc-server --restart=always -d -p8082:8082 harbor.kubeimooc.com/kubeimooc/kubeimooc-server:v1.7
+        - docker pull harbor.kubeimooc.com/kubeimooc/kubeimooc-server:v1.8.1
+        - docker run --name kubeimooc-server --restart=always -d -p8082:8082 harbor.kubeimooc.com/kubeimooc/kubeimooc-server:v1.8.1
 volumes:
   - name: hosts
     host:

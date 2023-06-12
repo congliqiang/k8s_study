@@ -32,6 +32,10 @@ go get k8s.io/client-go@v0.20.4
 
 ## 项目接口开发
 
+
+### k8s 认证与授权 v1.8.1
+在集群内初始化，不需要指定.kube/config
+
 ### k8s工作负载 v1.7
 
 StatefulSet
