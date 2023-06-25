@@ -22,6 +22,7 @@ type ApiGroup struct {
 	DaemonsetApi
 	JobApi
 	CronJobApi
+	RbacApi
 }
 
 var podValidate = validate.ValidateGroupApp.PodValidate
@@ -40,3 +41,4 @@ var deploymentService = service.ServiceGroupApp.DeploymentServiceGroup.Deploymen
 var daemonsetService = service.ServiceGroupApp.DaemonSetServiceGroup.DaemonSetService
 var jobService = service.ServiceGroupApp.JobServiceGroup.JobSetService
 var cronJobService = service.ServiceGroupApp.CronJobServiceGroup.CronJobSetService
+var rbacService = service.ServiceGroupApp.RbacServiceGroup.RbacService

@@ -12,6 +12,7 @@ import (
 	"kubeimooc.com/service/pod"
 	"kubeimooc.com/service/pv"
 	"kubeimooc.com/service/pvc"
+	"kubeimooc.com/service/rbac"
 	"kubeimooc.com/service/sc"
 	"kubeimooc.com/service/secret"
 	"kubeimooc.com/service/statefulset"
@@ -35,6 +36,7 @@ type ServiceGroup struct {
 	DaemonSetServiceGroup   daemonset.ServiceGroup
 	JobServiceGroup         job.ServiceGroup
 	CronJobServiceGroup     cronjob.ServiceGroup
+	RbacServiceGroup        rbac.RbacServiceGroup
 }
 
 var ServiceGroupApp = new(ServiceGroup)

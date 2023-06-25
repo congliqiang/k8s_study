@@ -32,6 +32,22 @@ go get k8s.io/client-go@v0.20.4
 
 ## 项目接口开发
 
+### k8s 认证与授权 v1.8.2
+
+ServiceAccount
+- [x] 创建
+- [x] 删除
+- [x] 查询（列表）
+
+Role/ClusterRole
+- [x] 创建/更新
+- [x] 删除
+- [x] 查询（详情/列表）
+
+RoleBinding/ClusterRoleBinding
+- [x] 创建/更新
+- [x] 删除
+- [x] 查询（详情/列表）
 
 ### k8s 认证与授权 v1.8.1
 在集群内初始化，不需要指定.kube/config
