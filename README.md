@@ -38,6 +38,8 @@ go get k8s.io/client-go@v0.20.4
 - [x] Artifacts 列表查询（分页，模糊查询）
 - [x] 镜像匹配的接口（用户Pod输入镜像信息的时候，自动匹配）
 
+### kubeimooc 1.9 集成crd
+
 ### k8s 认证与授权 v1.8.2
 
 ServiceAccount
