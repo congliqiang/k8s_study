@@ -31,6 +31,12 @@ go get k8s.io/client-go@v0.20.4
 ```
 
 ## 项目接口开发
+### kubeimooc 整合 Harbor v1.10
+- [x] 集成HarborAPI
+- [x] Projects 列表查询（分页，模糊查询）
+- [x] Repositories 列表查询（分页，模糊查询）
+- [x] Artifacts 列表查询（分页，模糊查询）
+- [x] 镜像匹配的接口（用户Pod输入镜像信息的时候，自动匹配）
 
 ### k8s 认证与授权 v1.8.2
 
