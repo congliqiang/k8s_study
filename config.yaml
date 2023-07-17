@@ -7,3 +7,7 @@ system:
     scheme: "https"
     username: "admin"
     password: "123"
+  prometheus:
+    enable: true
+    host: "192.168.1.16:30090"
+    scheme: "http"

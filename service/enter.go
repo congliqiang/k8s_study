@@ -8,6 +8,7 @@ import (
 	"kubeimooc.com/service/ingress"
 	"kubeimooc.com/service/ingroute"
 	"kubeimooc.com/service/job"
+	"kubeimooc.com/service/metrics"
 	"kubeimooc.com/service/node"
 	"kubeimooc.com/service/pod"
 	"kubeimooc.com/service/pv"
@@ -37,6 +38,7 @@ type ServiceGroup struct {
 	JobServiceGroup         job.ServiceGroup
 	CronJobServiceGroup     cronjob.ServiceGroup
 	RbacServiceGroup        rbac.RbacServiceGroup
+	MetricsServiceGroup     metrics.MetricsServiceGroup
 }
 
 var ServiceGroupApp = new(ServiceGroup)

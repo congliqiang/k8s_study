@@ -31,14 +31,24 @@ go get k8s.io/client-go@v0.20.4
 ```
 
 ## 项目接口开发
+
+### kubeimooc 仪表盘功能 v1.11
+- [x] 基础信息查看（k8s版本信息、集群初始化时间等）
+- [x] 各资源的统计信息
+- [x] 集群pod、cpu、内存耗用情况（瞬时）
+    - [x] 安装metrics-server
+    - [x] 调用metrics-server接口，计算集群的cpu和内存的耗用
+- [x] 集群 cpu、内存变化趋势
+    - [x] 安装prometheus
+    - [x] 提供prometheus pull 数据的接口(exporter)
+    - [x] 调用prometheus 查询指标统计数据
+
 ### kubeimooc 整合 Harbor v1.10
 - [x] 集成HarborAPI
 - [x] Projects 列表查询（分页，模糊查询）
 - [x] Repositories 列表查询（分页，模糊查询）
 - [x] Artifacts 列表查询（分页，模糊查询）
 - [x] 镜像匹配的接口（用户Pod输入镜像信息的时候，自动匹配）
-
-### kubeimooc 1.9 集成crd
 
 ### k8s 认证与授权 v1.8.2
 
